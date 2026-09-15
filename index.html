@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ROBO GOSH — Arduino Robotics Kits for Kids</title>
+<meta name="description" content="ROBO GOSH builds hands-on Arduino robotics kits for kids — real hardware, guided projects and step-by-step manuals. Made in Ahmedabad, India." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:        #0E1420;
+    --bg-2:      #10182A;
+    --panel:     #161F32;
+    --panel-2:   #1B2540;
+    --line:      rgba(255,255,255,0.08);
+    --mint:      #3DDC97;
+    --mint-dim:  #2AA974;
+    --amber:     #FFB84D;
+    --text:      #F2F5F4;
+    --muted:     #93A0B5;
+    --radius-s:  10px;
+    --radius-m:  18px;
+    --radius-l:  28px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,.display{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    line-height:1.08;
+    letter-spacing:-0.01em;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  img{ max-width:100%; display:block; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  @media (max-width:640px){
+    .wrap{ padding:0 20px; }
+  }
+
+  /* faint circuit-grid backdrop, whole page */
+  .grid-bg{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:0.35;
+    mask-image:radial-gradient(ellipse 70% 55% at 50% 0%, black 0%, transparent 75%);
+  }
+
+  /* ---------- cursor spark canvas ---------- */
+  #wand{
+    position:fixed;
+    inset:0;
+    z-index:999;
+    pointer-events:none;
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(14,20,32,0.72);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  header.scrolled{
+    border-bottom-color:var(--line);
+    background:rgba(14,20,32,0.92);
+  }
+  nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 32px;
+    max-width:1180px;
+    margin:0 auto;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:-0.01em;
+  }
+  .logo .mark{
+    width:34px; height:34px;
+    flex-shrink:0;
+  }
+  .logo .mark polygon{
+    fill:none;
+    stroke:var(--mint);
+    stroke-width:2.5;
+  }
+  .logo .mark circle{ fill:var(--amber); }
+
+  .navlinks{
+    display:flex;
+    align-items:center;
+    gap:36px;
+  }
+  .navlinks a{
+    font-size:15px;
+    color:var(--muted);
+    transition:color .2s ease;
+    position:relative;
+  }
+  .navlinks a:hover{ color:var(--text); }
+  .navlinks a::after{
+    content:'';
+    position:absolute;
+    left:0; bottom:-6px;
+    width:0; height:2px;
+    background:var(--mint);
+    transition:width .25s ease;
+  }
+  .navlinks a:hover::after{ width:100%; }
+
+  .nav-cta{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--mint);
+    color:#08130E;
+    font-weight:600;
+    font-size:14px;
+    padding:10px 18px;
+    border-radius:100px;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .nav-cta:hover{ background:#57e6ac; transform:translateY(-1px); }
+
+  .navlinks-mobile-toggle{ display:none; }
+
+  @media (max-width:780px){
+    .navlinks{ display:none; }
+    .navlinks-mobile-toggle{
+      display:flex; align-items:center; justify-content:center;
+      width:40px; height:40px;
+    }
+    .navlinks-mobile-toggle svg{ width:22px; height:22px; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    z-index:1;
+    padding:84px 0 60px;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:40px;
+    align-items:center;
+  }
+  @media (max-width:900px){
+    .hero-grid{ grid-template-columns:1fr; }
+  }
+
+  .eyebrow-tag{
+    display:inline-flex;
+    gap:10px;
+    font-size:13.5px;
+    color:var(--amber);
+    font-weight:500;
+    margin-bottom:22px;
+  }
+  .eyebrow-tag span{ color:var(--muted); }
+
+  .hero h1{
+    font-size:clamp(34px, 4.6vw, 56px);
+    max-width:620px;
+  }
+  .hero h1 .hl{ color:var(--mint); }
+
+  .hero p.lead{
+    margin-top:22px;
+    font-size:17px;
+    color:var(--muted);
+    max-width:480px;
+  }
+
+  .hero-ctas{
+    margin-top:34px;
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+
+  .btn-primary{
+    background:var(--mint);
+    color:#08130E;
+    font-weight:600;
+    font-size:15.5px;
+    padding:15px 26px;
+    border-radius:100px;
+    transition:transform .2s ease, box-shadow .2s ease;
+    box-shadow:0 0 0 0 rgba(61,220,151,0.5);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 22px -6px rgba(61,220,151,0.55); }
+
+  .btn-ghost{
+    border:1px solid var(--line);
+    color:var(--text);
+    font-weight:600;
+    font-size:15.5px;
+    padding:15px 26px;
+    border-radius:100px;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .btn-ghost:hover{ border-color:var(--mint); background:rgba(61,220,151,0.06); }
+
+  .trust-row{
+    margin-top:44px;
+    display:flex;
+    gap:28px;
+    flex-wrap:wrap;
+    color:var(--muted);
+    font-size:13.5px;
+  }
+  .trust-row .item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .trust-row svg{ width:16px; height:16px; color:var(--mint); flex-shrink:0; }
+
+  /* 3d stage */
+  .stage{
+    position:relative;
+    aspect-ratio:1/1;
+    max-width:480px;
+    margin:0 auto;
+  }
+  .stage canvas{
+    width:100% !important;
+    height:100% !important;
+  }
+  .stage-glow{
+    position:absolute;
+    inset:6%;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(61,220,151,0.22), transparent 65%);
+    filter:blur(10px);
+    z-index:0;
+  }
+  .stage .ring{
+    position:absolute;
+    inset:12%;
+    border:1px dashed rgba(61,220,151,0.25);
+    border-radius:50%;
+    animation:spin 40s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ---------- section shell ---------- */
+  section{
+    position:relative;
+    z-index:1;
+    padding:90px 0;
+  }
+  .section-head{
+    max-width:560px;
+    margin-bottom:52px;
+  }
+  .section-head .kicker{
+    color:var(--amber);
+    font-size:13.5px;
+    font-weight:500;
+    margin-bottom:12px;
+  }
+  .section-head h2{
+    font-size:clamp(26px, 3vw, 36px);
+  }
+  .section-head p{
+    margin-top:14px;
+    color:var(--muted);
+    font-size:15.5px;
+  }
+
+  /* ---------- what we make ---------- */
+  .make-split{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    overflow:hidden;
+  }
+  @media (max-width:760px){ .make-split{ grid-template-columns:1fr; } }
+  .make-tile{
+    background:var(--panel);
+    padding:44px 40px;
+    transition:background .25s ease;
+  }
+  .make-tile:hover{ background:var(--panel-2); }
+  .make-tile .num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    border:1px solid var(--line);
+    padding:4px 10px;
+    border-radius:100px;
+    display:inline-block;
+    margin-bottom:22px;
+  }
+  .make-tile h3{ font-size:23px; margin-bottom:10px; }
+  .make-tile p{ color:var(--muted); font-size:15px; margin-bottom:22px; }
+  .make-tile .go{
+    color:var(--mint);
+    font-weight:600;
+    font-size:14.5px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .make-tile .go svg{ width:14px; height:14px; transition:transform .2s ease; }
+  .make-tile:hover .go svg{ transform:translateX(3px); }
+
+  /* ---------- products ---------- */
+  .product{
+    display:grid;
+    grid-template-columns:0.85fr 1.15fr;
+    gap:56px;
+    align-items:center;
+    padding:52px 0;
+    border-top:1px solid var(--line);
+  }
+  .product:first-of-type{ border-top:none; }
+  .product.reverse{ grid-template-columns:1.15fr 0.85fr; }
+  .product.reverse .product-media{ order:2; }
+  @media (max-width:800px){
+    .product, .product.reverse{ grid-template-columns:1fr; }
+    .product.reverse .product-media{ order:0; }
+  }
+
+  .product-media{
+    position:relative;
+    background:var(--panel);
+    border-radius:var(--radius-m);
+    padding:30px;
+    border:1px solid var(--line);
+  }
+  .product-media img{
+    border-radius:var(--radius-s);
+    width:100%;
+  }
+  .badge{
+    position:absolute;
+    top:-12px; left:24px;
+    font-size:12.5px;
+    font-weight:600;
+    padding:6px 14px;
+    border-radius:100px;
+  }
+  .badge.best{ background:var(--amber); color:#241800; }
+  .badge.new{ background:var(--mint); color:#08130E; }
+
+  .product-info .specs{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    color:var(--muted);
+    font-size:14px;
+    margin:16px 0 24px;
+  }
+  .product-info .specs span{
+    padding:6px 12px;
+    border:1px solid var(--line);
+    border-radius:100px;
+  }
+  .product-info h3{ font-size:28px; }
+  .product-info .price{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:26px;
+    color:var(--mint);
+    margin-bottom:26px;
+  }
+  .product-info .price sub{ font-size:14px; color:var(--muted); margin-left:6px; }
+
+  /* ---------- why us strip ---------- */
+  .why-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:24px;
+  }
+  @media (max-width:900px){ .why-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:520px){ .why-grid{ grid-template-columns:1fr; } }
+  .why-card{
+    padding:28px 24px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+  }
+  .why-card svg{ width:26px; height:26px; color:var(--mint); margin-bottom:18px; }
+  .why-card h4{ font-family:'Space Grotesk', sans-serif; font-size:16px; margin-bottom:8px; }
+  .why-card p{ font-size:14px; color:var(--muted); }
+
+  /* ---------- order form ---------- */
+  .order-panel{
+    background:linear-gradient(165deg, var(--panel-2), var(--panel));
+    border:1px solid var(--line);
+    border-radius:var(--radius-l);
+    padding:52px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:56px;
+  }
+  @media (max-width:840px){ .order-panel{ grid-template-columns:1fr; padding:36px 26px; } }
+
+  .order-info h2{ font-size:28px; margin-bottom:14px; }
+  .order-info p{ color:var(--muted); font-size:15px; margin-bottom:26px; }
+  .order-info .price-tag{
+    display:inline-flex;
+    align-items:baseline;
+    gap:8px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    padding:16px 22px;
+    border-radius:var(--radius-m);
+  }
+  .order-info .price-tag .amt{ font-family:'Space Grotesk', sans-serif; font-size:30px; color:var(--mint); }
+  .order-info .price-tag .lbl{ font-size:13px; color:var(--muted); }
+
+  .field{ margin-bottom:18px; }
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:13px 16px;
+    border-radius:var(--radius-s);
+    font-size:14.5px;
+    font-family:inherit;
+    transition:border-color .2s ease;
+  }
+  .field textarea{ resize:vertical; min-height:70px; }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none;
+    border-color:var(--mint);
+  }
+
+  .order-submit{
+    width:100%;
+    background:var(--mint);
+    color:#08130E;
+    font-weight:600;
+    font-size:15.5px;
+    padding:16px;
+    border-radius:100px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:8px;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .order-submit:hover{ transform:translateY(-2px); background:#57e6ac; }
+  .order-submit svg{ width:18px; height:18px; }
+
+  /* ---------- about ---------- */
+  .about-panel{
+    border-left:2px solid var(--mint);
+    padding-left:32px;
+    max-width:760px;
+  }
+  .about-panel p{ color:var(--muted); font-size:16px; }
+  .about-panel p + p{ margin-top:16px; }
+
+  /* ---------- faq ---------- */
+  .faq-item{
+    border-bottom:1px solid var(--line);
+  }
+  .faq-item summary{
+    list-style:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 4px;
+    cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:16.5px;
+    font-weight:500;
+  }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item .plus{
+    width:22px; height:22px;
+    flex-shrink:0;
+    position:relative;
+  }
+  .faq-item .plus::before, .faq-item .plus::after{
+    content:'';
+    position:absolute;
+    background:var(--mint);
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    transition:transform .25s ease;
+  }
+  .faq-item .plus::before{ width:14px; height:2px; }
+  .faq-item .plus::after{ width:2px; height:14px; }
+  .faq-item[open] .plus::after{ transform:translate(-50%,-50%) rotate(90deg) scaleY(0); }
+  .faq-item p{
+    padding:0 4px 24px;
+    color:var(--muted);
+    font-size:15px;
+    max-width:640px;
+  }
+
+  .parts-details{ margin-top:22px; border-top:none; }
+  .parts-details summary{ font-size:15px; padding:0 0 14px; }
+  .parts-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:0 0 22px;
+  }
+  .parts-list span{
+    font-size:13px;
+    color:var(--muted);
+    padding:6px 12px;
+    border:1px solid var(--line);
+    border-radius:100px;
+  }
+
+  /* ---------- support ---------- */
+  .support-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+  }
+  @media (max-width:800px){ .support-grid{ grid-template-columns:1fr; } }
+  .support-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    padding:34px;
+  }
+  .support-card h3{ font-size:19px; margin-bottom:16px; }
+  .support-line{
+    display:flex;
+    gap:12px;
+    font-size:14.5px;
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+  .support-line svg{ width:17px; height:17px; color:var(--mint); flex-shrink:0; margin-top:2px; }
+  .support-line strong{ color:var(--text); display:block; margin-bottom:2px; }
+
+  .wa-link{
+    margin-top:18px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--mint);
+    color:#08130E;
+    font-weight:600;
+    font-size:14.5px;
+    padding:12px 20px;
+    border-radius:100px;
+  }
+  .wa-link svg{ width:17px; height:17px; }
+
+  .policy-text{ color:var(--muted); font-size:14px; }
+  .policy-text .note{ display:block; margin-top:14px; font-size:12.5px; opacity:0.65; }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:44px 0 32px;
+    position:relative;
+    z-index:1;
+  }
+  .footer-grid{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  footer .logo{ margin-bottom:10px; }
+  footer .addr{ color:var(--muted); font-size:13.5px; max-width:340px; }
+  footer .fright{ text-align:right; color:var(--muted); font-size:13.5px; }
+  @media (max-width:600px){ footer .fright{ text-align:left; } }
+  footer .fright a{ color:var(--mint); }
+
+  .reveal{
+    opacity:0;
+    transform:translateY(18px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<canvas id="wand"></canvas>
+
+<header id="siteHeader">
+  <nav>
+    <a href="#top" class="logo">
+      <svg class="mark" viewBox="0 0 34 34">
+        <polygon points="17,2 30,9.5 30,24.5 17,32 4,24.5 4,9.5" />
+        <circle cx="17" cy="17" r="3.4" />
+      </svg>
+      ROBO GOSH
+    </a>
+    <div class="navlinks">
+      <a href="#top">Home</a>
+      <a href="#shop">Shop</a>
+      <a href="#support">Contact</a>
+    </div>
+    <a href="#shop" class="nav-cta">Explore kits</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow-tag">Dream <span>·</span> Learn <span>·</span> Build <span>·</span> Grow</div>
+        <h1>Robotics kits that turn curiosity into <span class="hl">real projects</span></h1>
+        <p class="lead">Real Arduino hardware, guided step-by-step projects and a manual written for complete beginners — built for kids who'd rather build than watch.</p>
+        <div class="hero-ctas">
+          <a href="#shop" class="btn-primary">Explore the kits</a>
+          <a href="#order" class="btn-ghost">Order on WhatsApp</a>
+        </div>
+        <div class="trust-row">
+          <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg> Real Arduino UNO board</div>
+          <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h11l5 5v11H4z"/><path d="M9 12h6M9 16h6"/></svg> Guided project manual</div>
+          <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 3"/></svg> Mon–Sat WhatsApp support</div>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="stage-glow"></div>
+        <div class="ring"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHAT WE MAKE ================= -->
+  <section id="shop">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="kicker">What we make</div>
+        <h2>Hands-on kits for young builders</h2>
+        <p>From a first blinking LED to a working robot — every kit ships with real parts, not simulations.</p>
+      </div>
+
+      <div class="make-split reveal">
+        <div class="make-tile">
+          <span class="num">Starting kit</span>
+          <h3>Basic Kits</h3>
+          <p>Introductory kits for learning basic electronics — circuits, sensors and simple logic, explained from zero.</p>
+          <a href="#order" class="go">Explore basic kits
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="make-tile">
+          <span class="num">Advanced kit</span>
+          <h3>Robotics Kits</h3>
+          <p>Full Arduino and robotics builds — motors, sensors and code, guided one mission at a time.</p>
+          <a href="#order" class="go">Explore robotics kits
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PRODUCTS ================= -->
+  <section id="products">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="kicker">Robotics Kits</div>
+        <h2>Two kits. Both include a real Arduino UNO board and a full project manual.</h2>
+      </div>
+
+      <div class="product reveal">
+        <div class="product-media">
+          <span class="badge best">Best Seller</span>
+          <img src="https://i.ibb.co/TxY8k5xN/allen2-kit-jpg.jpg" alt="Allen 2.0 robotics kit" />
+        </div>
+        <div class="product-info">
+          <h3>Allen 2.0</h3>
+          <div class="specs">
+            <span>Real Arduino UNO board</span>
+            <span>10 Projects</span>
+            <span>50 Missions</span>
+          </div>
+          <div class="price">₹900 <sub>incl. manual + board</sub></div>
+          <a href="#order" class="btn-primary" onclick="selectKit('Allen 2.0', 900)">View details</a>
+        </div>
+      </div>
+
+      <div class="product reverse reveal">
+        <div class="product-media">
+          <span class="badge new">New Arrival</span>
+          <img src="https://i.ibb.co/WpcmJZgc/image.png" alt="Allen 3.0 Pro robotics kit" />
+        </div>
+        <div class="product-info">
+          <h3>Allen 3.0 Pro</h3>
+          <div class="specs">
+            <span>Advanced Robotics Kit</span>
+            <span>Extended sensors</span>
+            <span>More projects</span>
+          </div>
+          <div class="price">₹1,999 <sub>incl. manual + board</sub></div>
+          <a href="#order" class="btn-primary" onclick="selectKit('Allen 3.0 Pro', 1999)">View details</a>
+
+          <details class="faq-item parts-details">
+            <summary>What's inside the box <span class="plus"></span></summary>
+            <div class="parts-list">
+              <span>Breadboard</span>
+              <span>LCD1602</span>
+              <span>Battery Holder</span>
+              <span>Potentiometer (10KΩ)</span>
+              <span>Arduino UNO R3</span>
+              <span>Red LED</span>
+              <span>Yellow LED</span>
+              <span>Green LED</span>
+              <span>Blue LED</span>
+              <span>RGB LED</span>
+              <span>Dot-matrix Display</span>
+              <span>7-Segment Display</span>
+              <span>74HC595</span>
+              <span>L293D Motor Driver</span>
+              <span>NE555 Timer</span>
+              <span>Capacitor (104)</span>
+              <span>NPN Transistor (8050)</span>
+              <span>PNP Transistor (8550)</span>
+              <span>Button cap &amp; Button (large)</span>
+              <span>Active Buzzer</span>
+              <span>USB Cable</span>
+              <span>Switch</span>
+              <span>Capacitor (10uF)</span>
+              <span>Photoresistance</span>
+              <span>Button (small)</span>
+              <span>Header (40 pin)</span>
+              <span>DC Motor</span>
+              <span>Tilt Switch</span>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHY US ================= -->
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="kicker">Why Robo Gosh</div>
+        <h2>Everything a first-time builder needs, in one box</h2>
+      </div>
+      <div class="why-grid reveal">
+        <div class="why-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>
+          <h4>Real Arduino UNO</h4>
+          <p>Board included in every kit — nothing extra to buy.</p>
+        </div>
+        <div class="why-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h11l5 5v11H4z"/><path d="M9 12h6M9 16h6"/></svg>
+          <h4>Guided manual</h4>
+          <p>Step-by-step projects, written for complete beginners.</p>
+        </div>
+        <div class="why-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 1 1-3.8-7.1L21 3l-1 4.3a8.4 8.4 0 0 1 1 4.2Z"/></svg>
+          <h4>WhatsApp support</h4>
+          <p>Mon–Sat, 9 AM – 6 PM — real replies, not tickets.</p>
+        </div>
+        <div class="why-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h11v9H3zM14 11h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg>
+          <h4>Doorstep delivery</h4>
+          <p>Shipped across India, straight to your door.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ORDER FORM ================= -->
+  <section id="order">
+    <div class="wrap">
+      <div class="order-panel reveal">
+        <div class="order-info">
+          <div class="kicker">Order &amp; delivery</div>
+          <h2>Order in a minute, confirm on WhatsApp</h2>
+          <p>Fill in your details, pick a kit, and send it straight to our WhatsApp — we'll confirm delivery from there.</p>
+          <div class="price-tag">
+            <span class="amt" id="totalPrice">₹900</span>
+            <span class="lbl">Total for <span id="selectedKitLabel">Allen 2.0</span></span>
+          </div>
+        </div>
+
+        <form id="orderForm">
+          <div class="field">
+            <label for="fullName">Full name *</label>
+            <input id="fullName" type="text" placeholder="Your name" required />
+          </div>
+          <div class="field">
+            <label for="mobile">Mobile number (WhatsApp) *</label>
+            <input id="mobile" type="tel" placeholder="+91 " required />
+          </div>
+          <div class="field">
+            <label for="address">Delivery address *</label>
+            <textarea id="address" placeholder="House no, street, city, state, pincode" required></textarea>
+          </div>
+          <div class="field">
+            <label for="kitSelect">Product selected</label>
+            <select id="kitSelect" onchange="updatePrice()">
+              <option value="Allen 2.0|900">Allen 2.0 — ₹900</option>
+              <option value="Allen 3.0 Pro|1999">Allen 3.0 Pro — ₹1,999</option>
+            </select>
+          </div>
+          <button type="submit" class="order-submit">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11 11 0 0 0 3.6 17.8L2 22l4.3-1.6A11 11 0 1 0 20.5 3.5Zm-8.4 17a9 9 0 0 1-4.6-1.3l-.3-.2-3 .9.9-2.9-.2-.3A9 9 0 1 1 12.1 20.5Zm5-6.7c-.3-.1-1.6-.8-1.9-.9-.2-.1-.4-.1-.6.1-.2.2-.6.9-.8 1-.1.2-.3.2-.5.1-1.4-.6-2.4-1.4-3.2-2.7-.1-.2-.1-.4.1-.6l.5-.6c.1-.2.1-.4 0-.6-.1-.2-.6-1.5-.8-2-.1-.4-.3-.4-.5-.4h-.5c-.2 0-.5.1-.7.4-.2.3-.9 1-.9 2.3s.9 2.6 1.1 2.8c.1.2 1.8 2.8 4.4 3.8 2.1.9 2.5.7 3-.2.3-.5.3-1 .2-1.1-.1-.1-.3-.1-.5-.3Z"/></svg>
+            Send order on WhatsApp
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="kicker">About Robo Gosh</div>
+        <h2>Made in Ahmedabad, for builders everywhere</h2>
+      </div>
+      <div class="about-panel reveal">
+        <p>ROBO GOSH Ahmedabad, Gujarat se ek robotics learning kits brand hai — Allen 2.0 aur Allen 3.0 Pro jaise real Arduino-based hands-on kits banate hain, jisme guided step-by-step projects aur easy code guide milta hai taaki bachche khud se electronics, coding aur robotics seekh sakein.</p>
+        <p>Har order WhatsApp par personally support kiya jaata hai.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="kicker">FAQ</div>
+        <h2>Frequently asked questions</h2>
+      </div>
+
+      <div class="reveal">
+        <details class="faq-item" open>
+          <summary>Kya isme Arduino board included hai? <span class="plus"></span></summary>
+          <p>Haan, dono kits (Allen 2.0 &amp; Allen 3.0 Pro) me ek real Arduino Uno board included hai — kuch alag se kharidna nahi padta.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Kis age group ke bachchon ke liye sahi hai? <span class="plus"></span></summary>
+          <p>Ye kits beginners ke liye design kiye gaye hain — school-going kids jo pehli baar electronics/coding sikh rahe hain, unke liye best hain. Chhote bachchon ke liye parent/teacher ki guidance recommended hai.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Coding ka pehle se experience chahiye kya? <span class="plus"></span></summary>
+          <p>Nahi. Manual me step-by-step instructions hain — drag-drop blocks se shuru karke Arduino code tak, sab kuch guided hai.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Delivery me kitna time lagta hai? <span class="plus"></span></summary>
+          <p>Order confirm hone ke baad WhatsApp par exact delivery timeline bata di jaati hai. Kisi bhi update ke liye WhatsApp support par directly puchh sakte hain.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Order kaise place karein? <span class="plus"></span></summary>
+          <p>Kit chuno, order form bharo, phir "Send order on WhatsApp" dabao — order seedha humare WhatsApp par chala jaata hai aur wahin se confirm hota hai.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SUPPORT ================= -->
+  <section id="support">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="kicker">Support</div>
+        <h2>Replacement policy &amp; customer support</h2>
+      </div>
+
+      <div class="support-grid reveal">
+        <div class="support-card">
+          <h3>Replacement &amp; support policy</h3>
+          <p class="policy-text">Agar order me koi part missing ya damaged milta hai, to unboxing video ke saath WhatsApp par turant contact karein — hum jald se jald replacement ya solution provide karne ki koshish karte hain.
+            <span class="note">Default policy text — Robo Gosh team can edit this to match their actual return/replacement terms.</span>
+          </p>
+        </div>
+
+        <div class="support-card">
+          <h3>Customer support</h3>
+          <div class="support-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 1 1-3.8-7.1L21 3l-1 4.3a8.4 8.4 0 0 1 1 4.2Z"/></svg>
+            <div><strong>WhatsApp support</strong>+91 99249 33990</div>
+          </div>
+          <div class="support-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 3"/></svg>
+            <div><strong>Support hours</strong>Mon – Sat, 9:00 AM to 6:00 PM</div>
+          </div>
+          <div class="support-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <div><strong>Address</strong>H 306, D 403 Shashwat Mahadev 2, Mahadev Empire, Near Vastral, Ahmedabad – 382418, Gujarat, India</div>
+          </div>
+          <a class="wa-link" href="https://wa.me/919924933990" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11 11 0 0 0 3.6 17.8L2 22l4.3-1.6A11 11 0 1 0 20.5 3.5Zm-8.4 17a9 9 0 0 1-4.6-1.3l-.3-.2-3 .9.9-2.9-.2-.3A9 9 0 1 1 12.1 20.5Z"/></svg>
+            Chat on WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <a href="#top" class="logo">
+        <svg class="mark" viewBox="0 0 34 34">
+          <polygon points="17,2 30,9.5 30,24.5 17,32 4,24.5 4,9.5" />
+          <circle cx="17" cy="17" r="3.4" />
+        </svg>
+        ROBO GOSH
+      </a>
+      <p class="addr">Arduino robotics kits for young builders. H 306, D 403 Shashwat Mahadev 2, Mahadev Empire, Near Vastral, Ahmedabad — 382418, Gujarat, India.</p>
+    </div>
+    <div class="fright">
+      <p>WhatsApp <a href="https://wa.me/919924933990">+91 99249 33990</a></p>
+      <p>© 2026 ROBO GOSH. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/128/three.min.js"></script>
+<script>
+  /* ---------- header scroll state ---------- */
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 12);
+  });
+
+  /* ---------- reveal on scroll ---------- */
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => io.observe(el));
+
+  /* ---------- order form dynamic price ---------- */
+  function updatePrice(){
+    const sel = document.getElementById('kitSelect');
+    const [name, price] = sel.value.split('|');
+    document.getElementById('totalPrice').textContent = '₹' + Number(price).toLocaleString('en-IN');
+    document.getElementById('selectedKitLabel').textContent = name;
+  }
+  function selectKit(name, price){
+    const sel = document.getElementById('kitSelect');
+    sel.value = name + '|' + price;
+    updatePrice();
+  }
+
+  const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwE6dxJ3QK4Ple2oLZNWSKeUEfBoyCVT-uKiRot8kDJEXIyAylVnyL-GasAbZPSL_nygw/exec';
+
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('fullName').value.trim();
+    const mobile = document.getElementById('mobile').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const [kit, price] = document.getElementById('kitSelect').value.split('|');
+
+    if(!name || !mobile || !address){ return; }
+
+    const submitBtn = document.querySelector('#orderForm .order-submit');
+    const originalLabel = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Saving order…';
+    submitBtn.disabled = true;
+
+    // Save the order to the Google Sheet. no-cors mode means we can't read
+    // the response, but the row still gets appended on Google's side.
+    fetch(SHEET_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ name, mobile, address, product: kit, price })
+    })
+    .catch(err => console.error('Sheet save failed:', err))
+    .finally(() => {
+      submitBtn.innerHTML = originalLabel;
+      submitBtn.disabled = false;
+
+      const msg = `Hi Robo Gosh! I'd like to order:%0A%0AProduct: ${kit}%0APrice: ₹${price}%0AName: ${name}%0AMobile: ${mobile}%0AAddress: ${address}`;
+      window.open(`https://wa.me/919924933990?text=${msg}`, '_blank');
+    });
+  });
+
+  /* =====================================================
+     3D ROBOT HERO (Three.js)
+  ===================================================== */
+  (function initRobot(){
+    const stage = document.getElementById('stage');
+    if(!stage || !window.THREE) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+    camera.position.set(0, 0.4, 6.2);
+
+    const renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    stage.appendChild(renderer.domElement);
+
+    function resize(){
+      const w = stage.clientWidth, h = stage.clientHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // lights
+    scene.add(new THREE.AmbientLight(0x334455, 1.1));
+    const key = new THREE.DirectionalLight(0xffffff, 1.1);
+    key.position.set(3, 4, 5);
+    scene.add(key);
+    const rim = new THREE.PointLight(0x3ddc97, 3, 12);
+    rim.position.set(-3, 1, 2);
+    scene.add(rim);
+    const amberLight = new THREE.PointLight(0xffb84d, 2, 10);
+    amberLight.position.set(2, -2, 3);
+    scene.add(amberLight);
+
+    const bot = new THREE.Group();
+    scene.add(bot);
+
+    const mintMat = new THREE.MeshStandardMaterial({ color:0x1c2740, metalness:0.3, roughness:0.45, emissive:0x113322, emissiveIntensity:0.15 });
+    const panelMat = new THREE.MeshStandardMaterial({ color:0x22304d, metalness:0.4, roughness:0.4 });
+    const eyeMat = new THREE.MeshStandardMaterial({ color:0x3ddc97, emissive:0x3ddc97, emissiveIntensity:1.8 });
+    const amberMat = new THREE.MeshStandardMaterial({ color:0xffb84d, emissive:0xffb84d, emissiveIntensity:1.2 });
+
+    // head
+    const head = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.3, 1.3), mintMat);
+    head.position.y = 0.9;
+    bot.add(head);
+
+    const face = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.85, 0.05), panelMat);
+    face.position.set(0, 0.9, 0.66);
+    bot.add(face);
+
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), eyeMat);
+    eyeL.position.set(-0.32, 0.95, 0.72);
+    bot.add(eyeL);
+    const eyeR = eyeL.clone();
+    eyeR.position.x = 0.32;
+    bot.add(eyeR);
+
+    // antenna
+    const antStem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 8), panelMat);
+    antStem.position.set(0, 1.85, 0);
+    bot.add(antStem);
+    const antTip = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), amberMat);
+    antTip.position.set(0, 2.15, 0);
+    bot.add(antTip);
+
+    // body
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.5, 1.1), mintMat);
+    body.position.y = -0.55;
+    bot.add(body);
+
+    const chip = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.7, 0.08), panelMat);
+    chip.position.set(0, -0.5, 0.58);
+    bot.add(chip);
+
+    // little circuit lines on chest (thin boxes)
+    for(let i=0;i<3;i++){
+      const line = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.035, 0.02), eyeMat);
+      line.position.set(0, -0.28 - i*0.18, 0.63);
+      bot.add(line);
+    }
+
+    // arms
+    const armGeo = new THREE.CylinderGeometry(0.16, 0.16, 1.1, 10);
+    const armL = new THREE.Mesh(armGeo, panelMat);
+    armL.position.set(-1.15, -0.5, 0);
+    armL.rotation.z = 0.25;
+    bot.add(armL);
+    const armR = armL.clone();
+    armR.position.x = 1.15;
+    armR.rotation.z = -0.25;
+    bot.add(armR);
+
+    const handGeo = new THREE.SphereGeometry(0.2, 12, 12);
+    const handL = new THREE.Mesh(handGeo, amberMat);
+    handL.position.set(-1.4, -1.05, 0);
+    bot.add(handL);
+    const handR = handL.clone();
+    handR.position.x = 1.4;
+    bot.add(handR);
+
+    // base / legs
+    const legGeo = new THREE.CylinderGeometry(0.18, 0.14, 0.55, 10);
+    const legL = new THREE.Mesh(legGeo, panelMat);
+    legL.position.set(-0.45, -1.55, 0);
+    bot.add(legL);
+    const legR = legL.clone();
+    legR.position.x = 0.45;
+    bot.add(legR);
+
+    bot.scale.set(0.92, 0.92, 0.92);
+    bot.position.y = -0.3;
+
+    // mouse parallax
+    let targetX = 0, targetY = 0;
+    window.addEventListener('mousemove', (e) => {
+      targetX = (e.clientX / window.innerWidth - 0.5) * 0.6;
+      targetY = (e.clientY / window.innerHeight - 0.5) * 0.4;
+    });
+
+    let t = 0;
+    function animate(){
+      requestAnimationFrame(animate);
+      t += 0.012;
+      bot.rotation.y += 0.006;
+      bot.rotation.y += (targetX - bot.rotation.y * 0.15) * 0.02;
+      bot.rotation.x = targetY * 0.3;
+      bot.position.y = -0.3 + Math.sin(t) * 0.08;
+
+      const pulse = 1.4 + Math.sin(t*2) * 0.6;
+      eyeL.material.emissiveIntensity = pulse;
+      eyeR.material.emissiveIntensity = pulse;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  })();
+
+  /* =====================================================
+     CURSOR "WAND" SPARK TRAIL
+  ===================================================== */
+  (function initWand(){
+    const canvas = document.getElementById('wand');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    });
+
+    const colors = ['#3ddc97', '#ffb84d', '#7ff0c2'];
+    let particles = [];
+    let mx = -100, my = -100, lastMx = -100, lastMy = -100;
+    let hasMoved = false;
+
+    window.addEventListener('mousemove', (e) => {
+      lastMx = mx; lastMy = my;
+      mx = e.clientX; my = e.clientY;
+      hasMoved = true;
+
+      const speed = Math.hypot(mx - lastMx, my - lastMy);
+      const count = speed > 4 ? 2 : 1;
+      for(let i=0;i<count;i++){
+        particles.push({
+          x: mx + (Math.random()-0.5)*6,
+          y: my + (Math.random()-0.5)*6,
+          vx: (Math.random()-0.5)*0.6,
+          vy: (Math.random()-0.5)*0.6 - 0.3,
+          life: 1,
+          size: Math.random()*2.5 + 1.5,
+          color: colors[Math.floor(Math.random()*colors.length)]
+        });
+      }
+      if(particles.length > 140) particles.splice(0, particles.length-140);
+    });
+
+    function loop(){
+      requestAnimationFrame(loop);
+      ctx.clearRect(0,0,w,h);
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        p.life -= 0.02;
+        if(p.life > 0){
+          ctx.globalAlpha = Math.max(p.life, 0);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
+          ctx.fill();
+        }
+      });
+      ctx.globalAlpha = 1;
+      particles = particles.filter(p => p.life > 0);
+    }
+    loop();
+  })();
+</script>
+</body>
+</html>
